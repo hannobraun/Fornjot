@@ -562,11 +562,11 @@ impl Renderer {
             &mut encoder,
         );
 
-        let egui_input = egui::RawInput::default(); // TODO: Change this to use actual input.
+        let egui_input = self.egui.winit_state.take_egui_input(window);
         self.egui.context.begin_frame(egui_input);
 
         egui::SidePanel::left("fj-left-panel").show(&self.egui.context, |ui| {
-            ui.label("Fornjot");
+            ui.label("Fornjot").on_hover_text_at_pointer("with egui!");
         });
 
         // End the UI frame. We could now handle the output and draw the UI with the backend.

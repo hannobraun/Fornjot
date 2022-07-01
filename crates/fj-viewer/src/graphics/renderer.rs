@@ -573,7 +573,14 @@ impl Renderer {
         let egui_output = self.egui.context.end_frame();
         let egui_paint_jobs = self.egui.context.tessellate(egui_output.shapes);
 
-        // TODO: Actually render the UI.
+        self.paint_and_update_textures(
+            1.0, // TODO: Don't use hard-coded scale factor.
+            egui::Rgba::TRANSPARENT,
+            &egui_paint_jobs,
+            &egui_output.textures_delta,
+            &color_view,
+            &mut encoder,
+        );
 
         let command_buffer = encoder.finish();
         self.queue.submit(Some(command_buffer));

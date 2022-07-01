@@ -562,6 +562,19 @@ impl Renderer {
             &mut encoder,
         );
 
+        let egui_input = egui::RawInput::default(); // TODO: Change this to use actual input.
+        self.egui.context.begin_frame(egui_input);
+
+        egui::SidePanel::left("fj-left-panel").show(&self.egui.context, |ui| {
+            ui.label("Fornjot");
+        });
+
+        // End the UI frame. We could now handle the output and draw the UI with the backend.
+        let egui_output = self.egui.context.end_frame();
+        let egui_paint_jobs = self.egui.context.tessellate(egui_output.shapes);
+
+        // TODO: Actually render the UI.
+
         let command_buffer = encoder.finish();
         self.queue.submit(Some(command_buffer));
 

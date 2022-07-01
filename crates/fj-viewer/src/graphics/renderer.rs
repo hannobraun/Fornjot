@@ -574,7 +574,11 @@ impl Renderer {
         let egui_paint_jobs = self.egui.context.tessellate(egui_output.shapes);
 
         self.paint_and_update_textures(
-            1.0, // TODO: Don't use hard-coded scale factor.
+            //
+            // Note: `scale_factor` can be overridden via `WINIT_X11_SCALE_FACTOR` environment variable,
+            //       see: <https://docs.rs/winit/0.26.1/winit/window/struct.Window.html#method.scale_factor>
+            //
+            window.scale_factor() as f32,
             egui::Rgba::TRANSPARENT,
             &egui_paint_jobs,
             &egui_output.textures_delta,

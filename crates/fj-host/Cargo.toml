@@ -20,3 +20,5 @@ thiserror = "1.0.31"
 [dependencies.fj]
 version = "0.7.0"
 path = "../fj"
+
+[dependencies.fj-model-source-parse-poc]

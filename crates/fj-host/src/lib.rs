@@ -32,11 +32,14 @@ use thiserror::Error;
 
 use self::platform::HostPlatform;
 
+use fj_proto_param_cfg::ParamConfig;
+
 /// Represents a Fornjot model
 pub struct Model {
     src_path: PathBuf,
     lib_path: PathBuf,
     manifest_path: PathBuf,
+    parameters_config: Option<Vec<ParamConfig>>,
 }
 
 impl Model {
@@ -70,10 +73,24 @@ impl Model {
 
         let manifest_path = path.join("Cargo.toml");
 
+        let model_src_path = src_path.join("lib.rs"); // TODO: Obtain this properly.
+
+        dbg!(&model_src_path);
+
+        let parameters_config = fj_proto_param_cfg::from_file_path(
+            &model_src_path
+                .to_str()
+                .expect("Failed to get model source file path."),
+        )
+        .ok();
+
+        dbg!(&parameters_config);
+
         Ok(Self {
             src_path,
             lib_path,
             manifest_path,
+            parameters_config,
         })
     }
 

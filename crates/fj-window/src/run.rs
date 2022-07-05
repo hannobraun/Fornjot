@@ -86,6 +86,8 @@ pub fn run(
 
         //
 
+        let mut egui_wants_exclusive = false;
+
         if let Event::WindowEvent {
             event: window_event,
             ..
@@ -103,11 +105,12 @@ pub fn run(
             //       a title bar that overlaps the model then both the model & window
             //       get moved.
             //
-            // TODO: Revisit this.
+            // DONE: Revisit this. (Added `egui_wants_exclusive` which actually seems
+            //       to work as expected now.)
             //
             // TODO: Encapsulate the egui state/context access better.
             //
-            renderer
+            egui_wants_exclusive = renderer
                 .egui
                 .winit_state
                 .on_event(&renderer.egui.context, window_event);
@@ -237,16 +240,18 @@ pub fn run(
             _ => None,
         };
 
-        if let (Some(event), Some(shape), Some(camera)) =
-            (event, &shape, &mut camera)
-        {
-            input_handler.handle_event(
-                event,
-                window.size(),
-                &shape.mesh,
-                camera,
-                &mut actions,
-            );
+        if !egui_wants_exclusive {
+            if let (Some(event), Some(shape), Some(camera)) =
+                (event, &shape, &mut camera)
+            {
+                input_handler.handle_event(
+                    event,
+                    window.size(),
+                    &shape.mesh,
+                    camera,
+                    &mut actions,
+                );
+            }
         }
 
         if actions.exit {

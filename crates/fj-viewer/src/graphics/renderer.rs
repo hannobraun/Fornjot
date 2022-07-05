@@ -1,5 +1,7 @@
 use std::{io, mem::size_of};
 
+use fj_host;
+
 use fj_math::{Aabb, Point};
 use thiserror::Error;
 use tracing::debug;
@@ -293,6 +295,7 @@ impl Renderer {
         camera: &Camera,
         config: &mut DrawConfig,
         window: &egui_winit::winit::window::Window,
+        model_parameters: &mut fj_host::Parameters,
     ) -> Result<(), DrawError> {
         let aspect_ratio = self.surface_config.width as f64
             / self.surface_config.height as f64;

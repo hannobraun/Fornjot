@@ -28,7 +28,7 @@ use crate::window::{self, Window};
 
 /// Initializes a model viewer for a given model and enters its process loop.
 pub fn run(
-    watcher: Watcher,
+    mut watcher: Watcher,
     shape_processor: ShapeProcessor,
 ) -> Result<(), Error> {
     let event_loop = EventLoop::new();
@@ -228,9 +228,12 @@ pub fn run(
                 if let (Some(shape), Some(camera)) = (&shape, &mut camera) {
                     camera.update_planes(&shape.aabb);
 
-                    if let Err(err) =
-                        renderer.draw(camera, &mut draw_config, window.window())
-                    {
+                    if let Err(err) = renderer.draw(
+                        camera,
+                        &mut draw_config,
+                        &window.window(),
+                        &mut watcher.parameters,
+                    ) {
                         warn!("Draw error: {}", err);
                     }
                 }

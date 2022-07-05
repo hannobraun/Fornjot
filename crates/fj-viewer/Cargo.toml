@@ -20,6 +20,10 @@ tracing = "0.1.35"
 wgpu = "0.12.0"
 wgpu_glyph = "0.16.0"
 
+[dependencies.fj-host]
+version = "0.6.0"
+path = "../fj-host"
+
 [dependencies.fj-interop]
 version = "0.7.0"
 path = "../fj-interop"

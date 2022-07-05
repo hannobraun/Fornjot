@@ -150,7 +150,7 @@ impl Model {
     /// be queried for changes to the model.
     pub fn load_and_watch(
         self,
-        parameters: Parameters,
+        mut parameters: Parameters,
     ) -> Result<Watcher, Error> {
         let (tx, rx) = mpsc::sync_channel(0);
         let tx2 = tx.clone();
@@ -216,6 +216,8 @@ impl Model {
         // Will panic, if the receiving end has panicked. Not much we can do
         // about that, if it happened.
         thread::spawn(move || tx2.send(()).expect("Channel is disconnected"));
+
+        parameters.init_from_config(&self.parameters_config);
 
         Ok(Watcher {
             _watcher: Box::new(watcher),

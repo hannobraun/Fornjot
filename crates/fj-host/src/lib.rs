@@ -39,7 +39,7 @@ pub struct Model {
     src_path: PathBuf,
     lib_path: PathBuf,
     manifest_path: PathBuf,
-    parameters_config: Option<Vec<ParamConfig>>,
+    parameters_config: Vec<ParamConfig>,
 }
 
 impl Model {
@@ -82,7 +82,8 @@ impl Model {
                 .to_str()
                 .expect("Failed to get model source file path."),
         )
-        .ok();
+        .ok()
+        .unwrap_or_default();
 
         dbg!(&parameters_config);
 

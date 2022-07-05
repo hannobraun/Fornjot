@@ -23,6 +23,7 @@ use std::{
     io,
     path::PathBuf,
     process::Command,
+    str::FromStr,
     sync::mpsc,
     thread,
 };
@@ -279,12 +280,13 @@ impl Watcher {
 pub struct Parameters(
     pub HashMap<String, String>,
     BTreeMap<String, ParamConfig>,
+    pub BTreeMap<String, f64>, // Part of workaround for parameter value String vs f64 issue.
 );
 
 impl Parameters {
     /// Construct an empty instance of `Parameters`
     pub fn empty() -> Self {
-        Self(HashMap::new(), Default::default())
+        Self(HashMap::new(), Default::default(), Default::default())
     }
 
     ///
@@ -308,10 +310,16 @@ impl Parameters {
     pub fn init_from_config(&mut self, parameters_config: &[ParamConfig]) {
         let current_params = &mut self.0; // Tuple struct backwards compatibility hack.
         let configs = &mut self.1; // Tuple struct backwards compatibility hack.
+        let f64_values = &mut self.2; // Tuple struct backwards compatibility hack.
 
         for cfg in parameters_config {
-            current_params.entry(cfg.name()).or_insert(cfg.default());
+            let v = current_params.entry(cfg.name()).or_insert(cfg.default());
             configs.insert(cfg.name(), cfg.clone()); // Note: Not very robust.
+
+            // Ensures the f64 values used for GUI display are synchronized
+            // with the initial string values passed to the model.
+            *f64_values.entry(cfg.name()).or_default() =
+                f64::from_str(v).unwrap_or_default();
         }
     }
 }

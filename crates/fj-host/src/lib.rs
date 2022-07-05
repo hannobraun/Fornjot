@@ -227,6 +227,16 @@ impl Model {
             parameters,
         })
     }
+
+    ///
+    /// This function [will] request that the model be
+    /// regenerated due to a change of parameter values.
+    ///
+    /// Ideally the refresh will occur without recompilation
+    /// of the model.
+    ///
+    pub fn refresh(&mut self) {
+    }
 }
 
 /// Watches a model for changes, reloading it continually

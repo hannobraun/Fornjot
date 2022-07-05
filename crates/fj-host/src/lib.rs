@@ -284,6 +284,34 @@ impl Parameters {
     pub fn empty() -> Self {
         Self(HashMap::new(), Default::default())
     }
+
+    ///
+    /// "Initialize" the parameters based on the defaults supplied
+    /// by the model source file.
+    ///
+    /// The default values will be used _unless_ the parameter value
+    /// already exists, e.g. due to being supplied on command line.
+    ///
+    /// No validation of the previously supplied values is performed.
+    ///
+    //
+    //  This function also stores the provided parameter configuration
+    //  for further use, e.g. display in the UI.
+    //
+    //  It probably makes more sense to create the instance based on
+    //  the parameter configuration and _then_ update it with the values
+    //  supplied on the command line. But for the initial proof-of-concept
+    //  current approach required fewer changes to other parts of the code.
+    //
+    pub fn init_from_config(&mut self, parameters_config: &[ParamConfig]) {
+        let current_params = &mut self.0; // Tuple struct backwards compatibility hack.
+        let configs = &mut self.1; // Tuple struct backwards compatibility hack.
+
+        for cfg in parameters_config {
+            current_params.entry(cfg.name()).or_insert(cfg.default());
+            configs.insert(cfg.name(), cfg.clone()); // Note: Not very robust.
+        }
+    }
 }
 
 /// An error that can occur when loading or reloading a model

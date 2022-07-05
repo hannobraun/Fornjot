@@ -244,7 +244,11 @@ pub struct Watcher {
     _watcher: Box<dyn notify::Watcher>,
     channel: mpsc::Receiver<()>,
     model: Model,
-    parameters: Parameters,
+    ///
+    /// `parameters` is "temporarily" public so that it can be
+    /// accessed by UI-related code.
+    ///
+    pub parameters: Parameters,
 }
 
 impl Watcher {

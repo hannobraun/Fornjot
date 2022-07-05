@@ -248,6 +248,20 @@ pub struct Watcher {
 }
 
 impl Watcher {
+    ///
+    /// Request that the model is regenerated due to parameter value
+    /// change(s), e.g.via the UI.
+    ///
+    /// Handles synchronization of the UI value representation (f64)
+    /// with the model plugin value (String) representation.
+    ///
+    /// The updated shape will appear via `receive()` as usual.
+    ///
+    pub fn refresh(&mut self) {
+        self.parameters.update_string_values_hack();
+        self.model.refresh();
+    }
+
     /// Receive an updated shape that the reloaded model created
     ///
     /// Returns `None`, if the model has not changed since the last time this

@@ -18,7 +18,7 @@
 mod platform;
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     ffi::OsStr,
     io,
     path::PathBuf,
@@ -273,12 +273,16 @@ impl Watcher {
 }
 
 /// Parameters that are passed to a model
-pub struct Parameters(pub HashMap<String, String>);
+#[derive(Default)]
+pub struct Parameters(
+    pub HashMap<String, String>,
+    BTreeMap<String, ParamConfig>,
+);
 
 impl Parameters {
     /// Construct an empty instance of `Parameters`
     pub fn empty() -> Self {
-        Self(HashMap::new())
+        Self(HashMap::new(), Default::default())
     }
 }
 

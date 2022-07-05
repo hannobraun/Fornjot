@@ -322,6 +322,31 @@ impl Parameters {
                 f64::from_str(v).unwrap_or_default();
         }
     }
+
+    fn update_string_values_hack(&mut self) {
+        //
+        // This function is part of a workaround/hack to deal with the issue
+        // that we pass parameter values to models as strings but we want
+        // to use numeric values in the UI.
+        //
+        // Additionally, we currently give `egui` direct access to the f64
+        // values for modification by UI elements.
+        //
+        // This function needs to be called after the f64 values are
+        // modified via the GUI so that the string values passed to the
+        // model are synchronized with the modified f64 values.
+        //
+        // TODO: Figure out a better way of handling this?
+        //
+        let current_string_params = &mut self.0; // Tuple struct backwards compatibility hack.
+        let current_f64_values = &self.2; // Tuple struct backwards compatibility hack.
+
+        for (k, v) in current_string_params {
+            if let Some(value_as_f64) = current_f64_values.get(k) {
+                *v = value_as_f64.to_string();
+            }
+        }
+    }
 }
 
 /// An error that can occur when loading or reloading a model

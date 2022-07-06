@@ -31,7 +31,7 @@ use std::{
 use notify::Watcher as _;
 use thiserror::Error;
 
-use tracing::debug;
+use tracing::{debug, info};
 
 use self::platform::HostPlatform;
 
@@ -79,7 +79,7 @@ impl Model {
 
         let model_src_path = src_path.join("lib.rs"); // TODO: Obtain this properly.
 
-        dbg!(&model_src_path);
+        info!("Guessed model source path: {:?}", &model_src_path);
 
         let parameters_config = fj_proto_param_cfg::from_file_path(
             &model_src_path
@@ -89,7 +89,10 @@ impl Model {
         .ok()
         .unwrap_or_default();
 
-        dbg!(&parameters_config);
+        debug!(
+            "Extracted parameter configuration: {:#?}",
+            &parameters_config
+        );
 
         Ok(Self {
             src_path,

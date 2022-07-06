@@ -236,6 +236,46 @@ pub fn run(
                     ) {
                         warn!("Draw error: {}", err);
                     }
+
+                    if renderer.egui.options.reload_requested {
+                        //
+                        // NOTE: It's *VERY* important that `renderer.egui.options.reload_requested`
+                        //       gets reset to `false` here immediately.
+                        //
+                        //       This ensures only one (at most) reload/refresh thread
+                        //       is spawned per frame.
+                        //
+                        //       Yes, it *would* be better to have this throttling
+                        //       implemented elsewhere/more robustly[0].
+                        //
+                        //       [0] Hey, I only segfaulted my Window Manager *once*,
+                        //           you know! (See comment in `egui`-related `draw()`
+                        //           code for more details.)
+                        //
+                        //           Actually, it now occurs to me that (since part of the
+                        //           issue in that situation was that there hadn't been a
+                        //           frame redraw processed) a more robust approach would
+                        //           be to move this processing of state changes to be
+                        //           immediately after the frame draw.
+                        //
+                        //           DONE: Move this code as suggested above.
+                        //
+                        // TODO: Handle this better.
+                        //
+                        renderer.egui.options.reload_requested = false;
+
+                        debug!(
+                            "pre-`refresh()` parameters: {:?}",
+                            &watcher.parameters.0
+                        );
+
+                        watcher.refresh();
+
+                        debug!(
+                            "post-`refresh()` parameters: {:?}",
+                            &watcher.parameters.0
+                        );
+                    }
                 }
 
                 None
@@ -255,40 +295,6 @@ pub fn run(
                     &mut actions,
                 );
             }
-        }
-
-        if renderer.egui.options.reload_requested {
-            //
-            // NOTE: It's *VERY* important that `renderer.egui.options.reload_requested`
-            //       gets reset to `false` here immediately.
-            //
-            //       This ensures only one (at most) reload/refresh thread
-            //       is spawned per frame.
-            //
-            //       Yes, it *would* be better to have this throttling
-            //       implemented elsewhere/more robustly[0].
-            //
-            //       [0] Hey, I only segfaulted my Window Manager *once*,
-            //           you know! (See comment in `egui`-related `draw()`
-            //           code for more details.)
-            //
-            //           Actually, it now occurs to me that (since part of the
-            //           issue in that situation was that there hadn't been a
-            //           frame redraw processed) a more robust approach would
-            //           be to move this processing of state changes to be
-            //           immediately after the frame draw.
-            //
-            //           TODO: Move this code as suggested above.
-            //
-            // TODO: Handle this better.
-            //
-            renderer.egui.options.reload_requested = false;
-
-            debug!("pre-`refresh()` parameters: {:?}", &watcher.parameters.0);
-
-            watcher.refresh();
-
-            debug!("post-`refresh()` parameters: {:?}", &watcher.parameters.0);
         }
 
         if actions.exit {

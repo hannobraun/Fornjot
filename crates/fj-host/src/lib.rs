@@ -24,7 +24,7 @@ use std::{
     path::PathBuf,
     process::Command,
     str::FromStr,
-    sync::mpsc,
+    sync::mpsc::{self, SyncSender},
     thread,
 };
 
@@ -41,6 +41,7 @@ pub struct Model {
     lib_path: PathBuf,
     manifest_path: PathBuf,
     parameters_config: Vec<ParamConfig>,
+    tx3: Option<SyncSender<()>>, // Used to implement "refresh on parameter value change".
 }
 
 impl Model {
@@ -93,6 +94,7 @@ impl Model {
             lib_path,
             manifest_path,
             parameters_config,
+            tx3: None,
         })
     }
 
@@ -150,11 +152,13 @@ impl Model {
     /// Consumes this instance of `Model` and returns a [`Watcher`], which can
     /// be queried for changes to the model.
     pub fn load_and_watch(
-        self,
+        mut self,
         mut parameters: Parameters,
     ) -> Result<Watcher, Error> {
         let (tx, rx) = mpsc::sync_channel(0);
         let tx2 = tx.clone();
+
+        self.tx3 = Some(tx.clone()); // Used to implement "refresh on parameter value change".
 
         let watch_path = self.src_path.clone();
 
@@ -229,13 +233,50 @@ impl Model {
     }
 
     ///
-    /// This function [will] request that the model be
+    /// This function requests that the model be
     /// regenerated due to a change of parameter values.
     ///
     /// Ideally the refresh will occur without recompilation
     /// of the model.
     ///
-    pub fn refresh(&mut self) {
+    pub fn refresh(&self) {
+        //
+        // Hacky implemention of "refresh on parameter value change"
+        // feature.
+        //
+        // This piggy-backs on top of the existing "model source change"
+        // notification implementation which seemed like the most
+        // obvious implementation approach.
+        //
+        // Ideally this could be incorporated into the current
+        // Watcher implementation more transparently.
+        //
+        // Also, this currently results in `cargo build` being
+        // executed unnecessarily when the model regeneration
+        // could just re-use the existing binary for parameter
+        // value changes.
+        //
+        // NOTE: Calls to this function are *not* currently
+        //       throttled in any way at this level of the
+        //       system[0].
+        //
+        //       We should probably only allow one pending
+        //       reload request at a time.
+        //
+        //       Excessive calls to this function (e.g. multiple
+        //       times per frame) have lead to Bad Things(TM)
+        //       such as Window Manager segfaults during
+        //       development.
+        //
+        //       [0] The `reload_requested` related code in `run.rs`
+        //           does attempt to limit to one call per frame.
+        //
+        if let Some(tx3) = &self.tx3 {
+            let tx = tx3.clone();
+            thread::spawn(move || {
+                tx.send(()).expect("Channel is disconnected")
+            });
+        }
     }
 }
 

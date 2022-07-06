@@ -22,4 +22,4 @@ tracing = "0.1.35"
 version = "0.7.0"
 path = "../fj"
 
-[dependencies.fj-model-source-parse-poc]
+[dependencies.fj-proto-param-cfg]

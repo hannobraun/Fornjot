@@ -27,6 +27,7 @@ pub struct EguiOptionsState {
     show_original_ui: bool,
     show_settings_ui: bool,
     show_inspection_ui: bool,
+    pub reload_requested: bool,
 }
 
 pub struct EguiState {
@@ -411,6 +412,31 @@ impl Renderer {
             info
         }
 
+        //
+        // Note: We could probably detect whether we need to redraw
+        //       automatically but not handling it correctly could
+        //       potentially lead to "issues"[0] if we don't throttle
+        //       the redraw/reload request rate properly.
+        //
+        //       (Also a refresh/reload currently does a `cargo build`
+        //       rather than just call the model plugin again.)
+        //
+        //       So, for now we rely on a manually activated request.
+        //
+        //       [0] Hey, I only segfaulted my Window Manager *once*,
+        //           you know!
+        //
+        //           The issue in *that* situation was that I didn't
+        //           reset the value of `reload_requested` in the
+        //           outer loop, so (I think) it kept spawning refresh/reload
+        //           request threads--since there hadn't been a
+        //           frame redraw processed (which would've reset the
+        //           value).
+        //
+        // TODO: Improve this.
+        //
+        self.egui.options.reload_requested = false;
+
         egui::SidePanel::left("fj-left-panel").show(&self.egui.context, |ui| {
             ui.add_space(16.0);
 
@@ -566,6 +592,10 @@ impl Renderer {
                     }
 
                     ui.add_space(8.0);
+
+                    if ui.button("redraw").clicked() {
+                        self.egui.options.reload_requested = true;
+                    };
                 });
 
                 ui.add_space(8.0);

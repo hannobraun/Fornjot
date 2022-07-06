@@ -14,7 +14,7 @@ use fj_viewer::{
     screen::{Position, Screen as _, Size},
 };
 use futures::executor::block_on;
-use tracing::{trace, warn};
+use tracing::{debug, trace, warn};
 use winit::{
     dpi::PhysicalPosition,
     event::{
@@ -284,7 +284,11 @@ pub fn run(
             //
             renderer.egui.options.reload_requested = false;
 
+            debug!("pre-`refresh()` parameters: {:?}", &watcher.parameters.0);
+
             watcher.refresh();
+
+            debug!("post-`refresh()` parameters: {:?}", &watcher.parameters.0);
         }
 
         if actions.exit {

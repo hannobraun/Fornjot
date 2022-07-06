@@ -31,6 +31,8 @@ use std::{
 use notify::Watcher as _;
 use thiserror::Error;
 
+use tracing::debug;
+
 use self::platform::HostPlatform;
 
 use fj_proto_param_cfg::ParamConfig;
@@ -222,7 +224,11 @@ impl Model {
         // about that, if it happened.
         thread::spawn(move || tx2.send(()).expect("Channel is disconnected"));
 
+        debug!("pre-`init_from_config()` parameters: {:?}", &parameters.0);
+
         parameters.init_from_config(&self.parameters_config);
+
+        debug!("post-`init_from_config()` parameters: {:?}", &parameters.0);
 
         Ok(Watcher {
             _watcher: Box::new(watcher),

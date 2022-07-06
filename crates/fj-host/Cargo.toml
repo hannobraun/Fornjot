@@ -16,6 +16,7 @@ categories = ["encoding", "mathematics", "rendering"]
 libloading = "0.7.2"
 notify = "5.0.0-pre.15"
 thiserror = "1.0.31"
+tracing = "0.1.35"
 
 [dependencies.fj]
 version = "0.7.0"

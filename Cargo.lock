@@ -871,9 +871,11 @@ name = "fj-host"
 version = "0.7.0"
 dependencies = [
  "fj",
+ "fj-proto-param-cfg",
  "libloading",
  "notify",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]
@@ -934,6 +936,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "fj-proto-param-cfg"
+version = "0.1.1"
+source = "git+https://gitlab.com/RancidBacon/fj-model-source-parse-poc#8ad62d8ab8ebcb18466e6502a5a84860e40b8e43"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "fj-viewer"
 version = "0.7.0"
 dependencies = [
@@ -941,6 +952,7 @@ dependencies = [
  "egui",
  "egui-wgpu",
  "egui-winit",
+ "fj-host",
  "fj-interop",
  "fj-math",
  "raw-window-handle",

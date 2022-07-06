@@ -548,6 +548,30 @@ impl Renderer {
             ui.add_space(16.0);
         });
 
+        egui::TopBottomPanel::top("fj-top-panel").show(
+            &self.egui.context,
+            |ui| {
+                ui.add_space(8.0);
+
+                ui.horizontal(|ui| {
+                    ui.add_space(8.0);
+
+                    ui.heading("Model parameters");
+
+                    ui.add_space(8.0);
+
+                    for (k, v) in &mut model_parameters.2 {
+                        ui.heading(format!("{k}:"));
+                        ui.add(egui::DragValue::new(v));
+                    }
+
+                    ui.add_space(8.0);
+                });
+
+                ui.add_space(8.0);
+            },
+        );
+
         // End the UI frame. We could now handle the output and draw the UI with the backend.
         let egui_output = self.egui.context.end_frame();
         let egui_paint_jobs = self.egui.context.tessellate(egui_output.shapes);

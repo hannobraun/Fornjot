@@ -20,7 +20,7 @@ use super::{
 };
 
 #[derive(Default)]
-struct EguiOptionsState {
+pub struct EguiOptionsState {
     show_trace: bool,
     show_layout_debug_on_hover: bool,
     show_debug_text_example: bool,
@@ -33,7 +33,7 @@ pub struct EguiState {
     pub winit_state: egui_winit::State,
     pub context: egui::Context,
     rpass: egui_wgpu::renderer::RenderPass,
-    options: EguiOptionsState,
+    pub options: EguiOptionsState,
 }
 
 impl std::fmt::Debug for EguiState {

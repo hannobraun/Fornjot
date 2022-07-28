@@ -9,25 +9,25 @@ use std::{
 
 /// A FFI-safe version of `Vec<T>`.
 #[repr(C)]
-pub struct FfiSafeVec<T> {
+pub(crate) struct Vec<T> {
     ptr: NonNull<T>,
     len: usize,
 }
 
-impl<T: Debug> Debug for FfiSafeVec<T> {
+impl<T: Debug> Debug for Vec<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", &**self)
     }
 }
 
-impl<T: PartialEq> PartialEq for FfiSafeVec<T> {
+impl<T: PartialEq> PartialEq for Vec<T> {
     fn eq(&self, other: &Self) -> bool {
         **self == **other
     }
 }
 
-impl<T> From<Vec<T>> for FfiSafeVec<T> {
-    fn from(mut items: Vec<T>) -> Self {
+impl<T> From<std::vec::Vec<T>> for Vec<T> {
+    fn from(mut items: std::vec::Vec<T>) -> Self {
         // Safety: To avoid accidental double-frees and other memory issues, we
         // need to go through a specific dance.
         unsafe {
@@ -53,40 +53,52 @@ impl<T> From<Vec<T>> for FfiSafeVec<T> {
             // the items are gone, time to free the original vec
             drop(items);
 
-            FfiSafeVec { ptr, len }
+            Vec { ptr, len }
         }
     }
 }
 
-impl<T: Copy> From<FfiSafeVec<T>> for Box<[T]> {
-    fn from(v: FfiSafeVec<T>) -> Self {
+impl<T: Clone> From<Vec<T>> for std::vec::Vec<T> {
+    fn from(v: Vec<T>) -> Self {
+        v.iter().map(Clone::clone).collect()
+    }
+}
+
+impl<T: Clone> Clone for Vec<T> {
+    fn clone(&self) -> Self {
+        self.iter().cloned().collect()
+    }
+}
+
+impl<T: Copy> From<Vec<T>> for Box<[T]> {
+    fn from(v: Vec<T>) -> Self {
         Box::from(&*v)
     }
 }
 
-impl<T> FromIterator<T> for FfiSafeVec<T> {
+impl<T> FromIterator<T> for Vec<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let vec: Vec<T> = iter.into_iter().collect();
+        let vec: std::vec::Vec<T> = iter.into_iter().collect();
         vec.into()
     }
 }
 
-impl<T> Deref for FfiSafeVec<T> {
+impl<T> Deref for Vec<T> {
     type Target = [T];
 
     fn deref(&self) -> &Self::Target {
         // Safety: We control "ptr" and "len", so we know they are always
         // initialized and within bounds.
         unsafe {
-            let FfiSafeVec { ptr, len } = *self;
+            let Vec { ptr, len } = *self;
             std::slice::from_raw_parts(ptr.as_ptr(), len)
         }
     }
 }
 
-impl<T> Drop for FfiSafeVec<T> {
+impl<T> Drop for Vec<T> {
     fn drop(&mut self) {
-        let FfiSafeVec { ptr, len } = *self;
+        let Vec { ptr, len } = *self;
         let ptr = ptr.as_ptr();
 
         for i in 0..self.len {
@@ -110,33 +122,50 @@ impl<T> Drop for FfiSafeVec<T> {
 }
 
 // Safety: We're Send+Sync as long as the underlying type is.
-unsafe impl<T: Send> Send for FfiSafeVec<T> {}
-unsafe impl<T: Sync> Sync for FfiSafeVec<T> {}
+unsafe impl<T: Send> Send for Vec<T> {}
+unsafe impl<T: Sync> Sync for Vec<T> {}
 
 /// A FFI-safe version of `Box<str>`.
 #[repr(transparent)]
-#[derive(Debug, PartialEq)]
-pub struct FfiSafeString(FfiSafeVec<u8>);
+#[derive(Debug, PartialEq, Clone)]
+pub struct String(Vec<u8>);
 
-impl From<String> for FfiSafeString {
-    fn from(s: String) -> Self {
-        FfiSafeString(s.into_bytes().into())
+impl From<std::string::String> for String {
+    fn from(s: std::string::String) -> Self {
+        String(s.into_bytes().into())
     }
 }
 
-impl From<FfiSafeString> for Box<str> {
-    fn from(s: FfiSafeString) -> Self {
+impl From<String> for std::string::String {
+    fn from(s: String) -> Self {
+        s.to_string()
+    }
+}
+
+impl From<String> for Box<str> {
+    fn from(s: String) -> Self {
         Box::from(&*s)
     }
 }
+impl PartialEq<str> for String {
+    fn eq(&self, other: &str) -> bool {
+        **self == *other
+    }
+}
 
-impl Display for FfiSafeString {
+impl PartialEq<&str> for String {
+    fn eq(&self, other: &&str) -> bool {
+        *self == **other
+    }
+}
+
+impl Display for String {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         Display::fmt(&**self, f)
     }
 }
 
-impl Deref for FfiSafeString {
+impl Deref for String {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {
@@ -147,26 +176,36 @@ impl Deref for FfiSafeString {
 }
 
 /// A version of `Result` that is `#[repr(C)]`.
+#[must_use]
 #[repr(C)]
-pub enum FfiSafeResult<T, E> {
+pub enum Result<T, E> {
     Ok(T),
     Err(E),
 }
 
-impl<T, E> From<Result<T, E>> for FfiSafeResult<T, E> {
-    fn from(result: Result<T, E>) -> Self {
-        match result {
-            Ok(ok) => FfiSafeResult::Ok(ok),
-            Err(err) => FfiSafeResult::Err(err),
+impl<T, E: Debug> Result<T, E> {
+    pub fn unwrap(self) -> T {
+        match self {
+            Result::Ok(value) => value,
+            Result::Err(e) => panic!("Unwrapped an Err({e:?})"),
         }
     }
 }
 
-impl<T, E> From<FfiSafeResult<T, E>> for Result<T, E> {
-    fn from(result: FfiSafeResult<T, E>) -> Self {
+impl<T, E> From<std::result::Result<T, E>> for Result<T, E> {
+    fn from(result: std::result::Result<T, E>) -> Self {
         match result {
-            FfiSafeResult::Ok(ok) => Result::Ok(ok),
-            FfiSafeResult::Err(err) => Result::Err(err),
+            Ok(ok) => Result::Ok(ok),
+            Err(err) => Result::Err(err),
+        }
+    }
+}
+
+impl<T, E> From<Result<T, E>> for std::result::Result<T, E> {
+    fn from(result: Result<T, E>) -> Self {
+        match result {
+            Result::Ok(ok) => std::result::Result::Ok(ok),
+            Result::Err(err) => std::result::Result::Err(err),
         }
     }
 }
@@ -262,7 +301,7 @@ impl Deref for StringSlice {
 #[derive(Debug)]
 #[repr(C)]
 pub struct BoxedError {
-    msg: FfiSafeString,
+    msg: String,
 }
 
 impl Display for BoxedError {
@@ -278,6 +317,43 @@ impl From<Box<dyn std::error::Error + Send + Sync>> for BoxedError {
         // TODO: is it worth capturing the message from each source error, too?
         BoxedError {
             msg: err.to_string().into(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub enum Option<T> {
+    Some(T),
+    None,
+}
+
+impl<T> Option<T> {
+    pub fn map<T2>(self, func: impl FnOnce(T) -> T2) -> Option<T2> {
+        match self {
+            Option::Some(value) => Option::Some(func(value)),
+            Option::None => Option::None,
+        }
+    }
+}
+
+impl<T1, T2> From<std::option::Option<T1>> for Option<T2>
+where
+    T1: Into<T2>,
+{
+    fn from(opt: std::option::Option<T1>) -> Self {
+        match opt {
+            Some(value) => Option::Some(value.into()),
+            None => Option::None,
+        }
+    }
+}
+
+impl<T> From<Option<T>> for std::option::Option<T> {
+    fn from(opt: Option<T>) -> Self {
+        match opt {
+            Option::Some(value) => Some(value),
+            Option::None => None,
         }
     }
 }

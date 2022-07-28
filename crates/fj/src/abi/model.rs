@@ -22,8 +22,8 @@ impl crate::Model for Model {
         let result = unsafe { shape(ptr, ctx) };
 
         match result {
-            super::FfiSafeResult::Ok(shape) => Ok(shape),
-            super::FfiSafeResult::Err(err) => Err(err.into()),
+            super::ffi_safe::Result::Ok(shape) => Ok(shape),
+            super::ffi_safe::Result::Err(err) => Err(err.into()),
         }
     }
 

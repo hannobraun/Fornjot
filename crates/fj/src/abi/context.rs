@@ -1,6 +1,6 @@
 use std::{marker::PhantomData, os::raw::c_void, panic::AssertUnwindSafe};
 
-use crate::abi::wrappers::StringSlice;
+use crate::abi::ffi_safe::StringSlice;
 
 #[repr(C)]
 pub struct Context<'a> {

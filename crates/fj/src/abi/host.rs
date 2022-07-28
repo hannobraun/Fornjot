@@ -3,6 +3,7 @@ use std::{marker::PhantomData, os::raw::c_void, panic::AssertUnwindSafe};
 use crate::abi::Model;
 
 /// A FFI-safe `&mut dyn Host`.
+#[repr(C)]
 pub struct Host<'a> {
     user_data: *mut c_void,
     register_boxed_model: unsafe extern "C" fn(*mut c_void, model: Model),

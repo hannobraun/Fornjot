@@ -53,6 +53,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(C)]
+#[allow(improper_ctypes)] // Box isn't FFI-safe
 pub enum Shape {
     /// A group of two 3-dimensional shapes
     Group(Box<Group>),

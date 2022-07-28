@@ -1,12 +1,12 @@
 use std::f64::consts::PI;
 
-use fj::{syntax::*, Angle, HostExt, ModelMetadata, PluginMetadata};
+use fj::{syntax::*, Angle, HostExt, Metadata, ModelMetadata};
 
 fj::register_model!(|host| {
     host.register_model(Test);
 
     Ok(
-        PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+        Metadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
             .with_short_description(env!("CARGO_PKG_DESCRIPTION"))
             .with_description(include_str!("../README.md"))
             .with_homepage(env!("CARGO_PKG_HOMEPAGE"))

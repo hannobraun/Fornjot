@@ -1,12 +1,12 @@
 use fj::{
-    syntax::*, ArgumentMetadata, ContextExt, HostExt, Model, ModelMetadata,
-    PluginMetadata,
+    syntax::*, ArgumentMetadata, ContextExt, HostExt, Metadata, Model,
+    ModelMetadata,
 };
 
 fj::register_model!(|host| {
     host.register_model(Spacer);
 
-    Ok(PluginMetadata::new(
+    Ok(Metadata::new(
         env!("CARGO_PKG_NAME"),
         env!("CARGO_PKG_VERSION"),
     ))

@@ -1,20 +1,20 @@
-/// Information about a particular plugin that can be used by the host for
+/// Information about a particular module that can be used by the host for
 /// things like introspection and search.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PluginMetadata {
-    /// A short, human-friendly name used to identify this plugin.
+pub struct Metadata {
+    /// A short, human-friendly name used to identify this module.
     pub name: String,
-    /// A semver-compliant version number for the plugin.
+    /// A semver-compliant version number.
     pub version: String,
-    /// A short, one-line description of what the plugin does.
+    /// A short, one-line description.
     pub short_description: Option<String>,
-    /// A more elaborate description of what the plugin does.
+    /// A more elaborate description.
     pub description: Option<String>,
-    /// A link to the plugin's homepage.
+    /// A link to the homepage.
     pub homepage: Option<String>,
-    /// A link to the plugin's source code.
+    /// A link to the source code.
     pub repository: Option<String>,
-    /// The name of the software license(s) this plugin is released under.
+    /// The name of the software license(s) this software is released under.
     ///
     /// This is interpreted as a SPDX license expression (e.g.  `MIT OR
     /// Apache-2.0`). See [the SPDX site][spdx] for more information.
@@ -23,8 +23,8 @@ pub struct PluginMetadata {
     pub license: Option<String>,
 }
 
-impl PluginMetadata {
-    /// Create metadata for a plugin.
+impl Metadata {
+    /// Create a [`Metadata`] object with the bare minimum required fields.
     ///
     /// # Panics
     ///
@@ -35,7 +35,7 @@ impl PluginMetadata {
         let version = version.into();
         assert!(!version.is_empty());
 
-        PluginMetadata {
+        Metadata {
             name,
             version,
             short_description: None,
@@ -46,7 +46,7 @@ impl PluginMetadata {
         }
     }
 
-    /// Set the [`PluginMetadata::short_description`] field.
+    /// Set the [`Metadata::short_description`] field.
     pub fn with_short_description(
         self,
         short_description: impl Into<String>,
@@ -56,59 +56,59 @@ impl PluginMetadata {
             return self;
         }
 
-        PluginMetadata {
+        Metadata {
             short_description: Some(short_description),
             ..self
         }
     }
 
-    /// Set the [`PluginMetadata::description`] field.
+    /// Set the [`Metadata::description`] field.
     pub fn with_description(self, description: impl Into<String>) -> Self {
         let description = description.into();
         if description.is_empty() {
             return self;
         }
 
-        PluginMetadata {
+        Metadata {
             description: Some(description),
             ..self
         }
     }
 
-    /// Set the [`PluginMetadata::homepage`] field.
+    /// Set the [`Metadata::homepage`] field.
     pub fn with_homepage(self, homepage: impl Into<String>) -> Self {
         let homepage = homepage.into();
         if homepage.is_empty() {
             return self;
         }
 
-        PluginMetadata {
+        Metadata {
             homepage: Some(homepage),
             ..self
         }
     }
 
-    /// Set the [`PluginMetadata::repository`] field.
+    /// Set the [`Metadata::repository`] field.
     pub fn with_repository(self, repository: impl Into<String>) -> Self {
         let repository = repository.into();
         if repository.is_empty() {
             return self;
         }
 
-        PluginMetadata {
+        Metadata {
             repository: Some(repository),
             ..self
         }
     }
 
-    /// Set the [`PluginMetadata::license`] field.
+    /// Set the [`Metadata::license`] field.
     pub fn with_license(self, license: impl Into<String>) -> Self {
         let license = license.into();
         if license.is_empty() {
             return self;
         }
 
-        PluginMetadata {
+        Metadata {
             license: Some(license),
             ..self
         }

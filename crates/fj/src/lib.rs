@@ -39,7 +39,7 @@ pub use self::{
     },
     group::Group,
     host::{Host, HostExt},
-    metadata::{ArgumentMetadata, ModelMetadata, PluginMetadata},
+    metadata::{ArgumentMetadata, Metadata, ModelMetadata},
     model::Model,
     shape_2d::*,
     sweep::Sweep,

@@ -32,7 +32,7 @@ impl From<crate::ModelMetadata> for ModelMetadata {
 
 #[derive(Debug, Clone)]
 #[repr(C)]
-pub struct PluginMetadata {
+pub struct Metadata {
     name: ffi_safe::String,
     version: ffi_safe::String,
     short_description: ffi_safe::Option<ffi_safe::String>,
@@ -42,9 +42,9 @@ pub struct PluginMetadata {
     license: ffi_safe::Option<ffi_safe::String>,
 }
 
-impl From<PluginMetadata> for crate::PluginMetadata {
-    fn from(m: PluginMetadata) -> Self {
-        let PluginMetadata {
+impl From<Metadata> for crate::Metadata {
+    fn from(m: Metadata) -> Self {
+        let Metadata {
             name,
             version,
             short_description,
@@ -54,7 +54,7 @@ impl From<PluginMetadata> for crate::PluginMetadata {
             license,
         } = m;
 
-        crate::PluginMetadata {
+        crate::Metadata {
             name: name.into(),
             version: version.into(),
             short_description: short_description.map(Into::into).into(),
@@ -66,9 +66,9 @@ impl From<PluginMetadata> for crate::PluginMetadata {
     }
 }
 
-impl From<crate::PluginMetadata> for PluginMetadata {
-    fn from(m: crate::PluginMetadata) -> Self {
-        let crate::PluginMetadata {
+impl From<crate::Metadata> for Metadata {
+    fn from(m: crate::Metadata) -> Self {
+        let crate::Metadata {
             name,
             version,
             short_description,
@@ -78,7 +78,7 @@ impl From<crate::PluginMetadata> for PluginMetadata {
             license,
         } = m;
 
-        PluginMetadata {
+        Metadata {
             name: name.into(),
             version: version.into(),
             short_description: short_description.into(),

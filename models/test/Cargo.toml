@@ -2,6 +2,10 @@
 name = "test"
 version = "0.1.0"
 edition = "2021"
+description = "An example model"
+homepage = "https://www.fornjot.app/"
+repository = "https://github.com/hannobraun/fornjot"
+license = "0BSD"
 
 [lib]
 crate-type = ["cdylib"]

@@ -47,7 +47,7 @@ impl PluginMetadata {
     }
 
     /// Set the [`PluginMetadata::short_description`] field.
-    pub fn set_short_description(
+    pub fn with_short_description(
         self,
         short_description: impl Into<String>,
     ) -> Self {
@@ -63,7 +63,7 @@ impl PluginMetadata {
     }
 
     /// Set the [`PluginMetadata::description`] field.
-    pub fn set_description(self, description: impl Into<String>) -> Self {
+    pub fn with_description(self, description: impl Into<String>) -> Self {
         let description = description.into();
         if description.is_empty() {
             return self;
@@ -76,7 +76,7 @@ impl PluginMetadata {
     }
 
     /// Set the [`PluginMetadata::homepage`] field.
-    pub fn set_homepage(self, homepage: impl Into<String>) -> Self {
+    pub fn with_homepage(self, homepage: impl Into<String>) -> Self {
         let homepage = homepage.into();
         if homepage.is_empty() {
             return self;
@@ -89,7 +89,7 @@ impl PluginMetadata {
     }
 
     /// Set the [`PluginMetadata::repository`] field.
-    pub fn set_repository(self, repository: impl Into<String>) -> Self {
+    pub fn with_repository(self, repository: impl Into<String>) -> Self {
         let repository = repository.into();
         if repository.is_empty() {
             return self;
@@ -102,7 +102,7 @@ impl PluginMetadata {
     }
 
     /// Set the [`PluginMetadata::license`] field.
-    pub fn set_license(self, license: impl Into<String>) -> Self {
+    pub fn with_license(self, license: impl Into<String>) -> Self {
         let license = license.into();
         if license.is_empty() {
             return self;

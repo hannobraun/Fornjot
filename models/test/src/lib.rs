@@ -1,18 +1,41 @@
 use std::f64::consts::PI;
 
-use fj::{syntax::*, Angle};
+use fj::{syntax::*, Angle, HostExt, ModelMetadata, PluginMetadata};
 
-#[fj::model]
-pub fn model() -> fj::Shape {
-    let a = star(4, 1., [0, 255, 0, 200]);
-    let b = star(5, -1., [255, 0, 0, 255])
-        .rotate([1., 1., 1.], Angle::from_deg(45.))
-        .translate([3., 3., 1.]);
-    let c = spacer().translate([6., 6., 1.]);
+fj::register_model!(|host| {
+    host.register_model(Test);
 
-    let group = a.group(&b).group(&c);
+    Ok(
+        PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+            .with_short_description(env!("CARGO_PKG_DESCRIPTION"))
+            .with_description(include_str!("../README.md"))
+            .with_homepage(env!("CARGO_PKG_HOMEPAGE"))
+            .with_repository(env!("CARGO_PKG_REPOSITORY"))
+            .with_license(env!("CARGO_PKG_LICENSE")),
+    )
+});
 
-    group.into()
+struct Test;
+
+impl fj::Model for Test {
+    fn shape(
+        &self,
+        _ctx: &dyn fj::Context,
+    ) -> Result<fj::Shape, Box<dyn std::error::Error + Send + Sync>> {
+        let a = star(4, 1., [0, 255, 0, 200]);
+        let b = star(5, -1., [255, 0, 0, 255])
+            .rotate([1., 1., 1.], Angle::from_deg(45.))
+            .translate([3., 3., 1.]);
+        let c = spacer().translate([6., 6., 1.]);
+
+        let group = a.group(&b).group(&c);
+
+        Ok(group.into())
+    }
+
+    fn metadata(&self) -> ModelMetadata {
+        ModelMetadata::new("Test")
+    }
 }
 
 fn star(num_points: u64, height: f64, color: [u8; 4]) -> fj::Shape {

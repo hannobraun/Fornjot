@@ -7,6 +7,7 @@ pub trait Host {
     /// This is mainly for more advanced use cases (e.g. when you need to close
     /// over extra state to load the model). For simpler models, you probably
     /// want to use [`HostExt::register_model()`] instead.
+    #[doc(hidden)]
     fn register_boxed_model(&mut self, model: Box<dyn Model>);
 }
 

@@ -20,6 +20,8 @@
 
 pub mod syntax;
 
+#[doc(hidden)]
+pub mod abi;
 mod angle;
 mod context;
 mod group;

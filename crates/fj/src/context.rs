@@ -9,37 +9,37 @@ use std::{
 ///
 /// Check out the [`ContextExt`] trait for some helper methods.
 pub trait Context {
-    /// The arguments dictionary associated with this [`Context`].
-    fn arguments(&self) -> &HashMap<String, String>;
+    /// Get an argument that was passed to this model.
+    fn get_argument(&self, name: &str) -> Option<&str>;
 }
 
 impl<C: Context + ?Sized> Context for &'_ C {
-    fn arguments(&self) -> &HashMap<String, String> {
-        (**self).arguments()
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        (**self).get_argument(name)
     }
 }
 
 impl<C: Context + ?Sized> Context for Box<C> {
-    fn arguments(&self) -> &HashMap<String, String> {
-        (**self).arguments()
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        (**self).get_argument(name)
     }
 }
 
 impl<C: Context + ?Sized> Context for std::rc::Rc<C> {
-    fn arguments(&self) -> &HashMap<String, String> {
-        (**self).arguments()
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        (**self).get_argument(name)
     }
 }
 
 impl<C: Context + ?Sized> Context for std::sync::Arc<C> {
-    fn arguments(&self) -> &HashMap<String, String> {
-        (**self).arguments()
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        (**self).get_argument(name)
     }
 }
 
 impl Context for HashMap<String, String> {
-    fn arguments(&self) -> &HashMap<String, String> {
-        self
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        self.get(name).map(|s| s.as_str())
     }
 }
 
@@ -48,9 +48,6 @@ impl Context for HashMap<String, String> {
 /// By splitting these methods out into a separate trait, [`Context`] can stay
 /// object-safe while allowing convenience methods that use generics.
 pub trait ContextExt {
-    /// Get an argument that was passed to this model.
-    fn get_argument(&self, name: &str) -> Option<&str>;
-
     /// Get an argument, returning a [`MissingArgument`] error if it doesn't
     /// exist.
     fn get_required_argument(
@@ -75,10 +72,6 @@ pub trait ContextExt {
 }
 
 impl<C: Context + ?Sized> ContextExt for C {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        self.arguments().get(name).map(|s| s.as_str())
-    }
-
     fn get_required_argument(
         &self,
         name: &str,

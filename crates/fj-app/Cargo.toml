@@ -64,4 +64,5 @@ version = "0.3.15"
 features = ["env-filter", "fmt"]
 
 [dev-dependencies]
+stl = "0.2.1"
 tempfile = "3.3.0"

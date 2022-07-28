@@ -59,14 +59,14 @@ macro_rules! register_model {
         unsafe extern "C" fn fj_model_init(
             mut host: *mut $crate::abi::Host<'_>,
         ) -> $crate::abi::InitResult {
-            let host: &mut dyn $crate::Host = &mut *host;
-
-            let result: Result<
+            let init: fn(
+                &mut dyn $crate::Host,
+            ) -> Result<
                 $crate::PluginMetadata,
                 Box<dyn std::error::Error + Send + Sync>,
-            > = $init(host);
+            > = $init;
 
-            match result {
+            match init(&mut *host) {
                 Ok(meta) => $crate::abi::InitResult::Ok(meta.into()),
                 Err(e) => $crate::abi::InitResult::Err(e.into()),
             }

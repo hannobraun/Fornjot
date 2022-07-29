@@ -25,9 +25,11 @@ mod group;
 mod shape_2d;
 mod sweep;
 mod transform;
+mod union;
 
 pub use self::{
     angle::*, group::Group, shape_2d::*, sweep::Sweep, transform::Transform,
+    union::Union,
 };
 pub use fj_proc::*;
 #[cfg(feature = "serde")]
@@ -49,4 +51,7 @@ pub enum Shape {
 
     /// A transformed 3-dimensional shape
     Transform(Box<Transform>),
+
+    /// A union of two shapes
+    Union(Box<Union>),
 }

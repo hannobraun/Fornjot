@@ -23,6 +23,7 @@ mod group;
 mod sketch;
 mod sweep;
 mod transform;
+mod union;
 
 use fj_interop::debug::DebugInfo;
 use fj_kernel::{
@@ -84,6 +85,15 @@ impl Shape for fj::Shape {
             Self::Transform(shape) => {
                 shape.compute_brep(config, tolerance, debug_info)
             }
+            Self::Union(shape) => validate(
+                shape
+                    .compute_brep(config, tolerance, debug_info)?
+                    .into_inner()
+                    .into_faces()
+                    .into_iter()
+                    .collect(),
+                config,
+            ),
         }
     }
 
@@ -93,6 +103,7 @@ impl Shape for fj::Shape {
             Self::Group(shape) => shape.bounding_volume(),
             Self::Sweep(shape) => shape.bounding_volume(),
             Self::Transform(shape) => shape.bounding_volume(),
+            Self::Union(shape) => shape.bounding_volume(),
         }
     }
 }

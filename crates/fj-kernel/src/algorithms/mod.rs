@@ -8,6 +8,7 @@ mod reverse;
 mod sweep;
 mod transform;
 mod triangulate;
+mod union;
 
 pub mod intersection;
 
@@ -17,4 +18,5 @@ pub use self::{
     sweep::sweep,
     transform::{transform_faces, TransformObject},
     triangulate::triangulate,
+    union::union,
 };

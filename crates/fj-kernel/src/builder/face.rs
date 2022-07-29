@@ -57,16 +57,16 @@ impl FacePolygon {
     }
 }
 
-impl From<FacePolygon> for Face {
-    fn from(polygon: FacePolygon) -> Self {
-        polygon.into_face()
-    }
-}
-
 impl Deref for FacePolygon {
     type Target = Face;
 
     fn deref(&self) -> &Self::Target {
         &self.face
+    }
+}
+
+impl From<FacePolygon> for Face {
+    fn from(polygon: FacePolygon) -> Self {
+        polygon.into_face()
     }
 }

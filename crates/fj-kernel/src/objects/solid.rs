@@ -46,6 +46,28 @@ impl Solid {
         self
     }
 
+    /// Update the given face using the provided closure
+    ///
+    /// # Panics
+    ///
+    /// Panics, if `face` does not exist in this solid.
+    ///
+    /// Panics, if the updated face is equal to one that already exists in the
+    /// solid.
+    pub fn update_face(
+        mut self,
+        face: &Face,
+        f: impl FnOnce(&Face) -> Face,
+    ) -> Self {
+        let face_exists = self.faces.remove(face);
+        assert!(face_exists);
+
+        let updated_is_unique = self.faces.insert(f(face));
+        assert!(updated_is_unique);
+
+        self
+    }
+
     /// Access the solid's faces
     pub fn faces(&self) -> impl Iterator<Item = &Face> {
         self.faces.iter()

@@ -131,3 +131,28 @@ where
         }
     }
 }
+
+/// Convenient syntax to create an [`fj::Union`]
+///
+/// [`fj::Union`]: crate::Union
+pub trait Union {
+    /// Create a difference between `self` and `other`
+    fn union<Other>(&self, other: &Other) -> crate::Union
+    where
+        Other: Clone + Into<crate::Shape>;
+}
+
+impl<T> Union for T
+where
+    T: Clone + Into<crate::Shape>,
+{
+    fn union<Other>(&self, other: &Other) -> crate::Union
+    where
+        Other: Clone + Into<crate::Shape>,
+    {
+        let a = self.clone().into();
+        let b = other.clone().into();
+
+        crate::Union::from_shapes([a, b])
+    }
+}

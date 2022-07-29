@@ -9,5 +9,5 @@ pub use self::{
     cycle::CycleBuilder,
     edge::EdgeBuilder,
     face::{FaceBuilder, FacePolygon},
-    solid::SolidBuilder,
+    solid::{Cube, SolidBuilder},
 };

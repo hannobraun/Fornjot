@@ -20,14 +20,30 @@
 
 pub mod syntax;
 
+#[doc(hidden)]
+pub mod abi;
 mod angle;
+mod context;
 mod group;
+mod host;
+mod metadata;
+mod model;
 mod shape_2d;
 mod sweep;
 mod transform;
 
 pub use self::{
-    angle::*, group::Group, shape_2d::*, sweep::Sweep, transform::Transform,
+    angle::*,
+    context::{
+        Context, ContextError, ContextExt, MissingArgument, ParseFailed,
+    },
+    group::Group,
+    host::{Host, HostExt},
+    metadata::{ArgumentMetadata, Metadata, ModelMetadata},
+    model::Model,
+    shape_2d::*,
+    sweep::Sweep,
+    transform::Transform,
 };
 pub use fj_proc::*;
 #[cfg(feature = "serde")]
@@ -37,6 +53,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(C)]
+#[allow(improper_ctypes)] // Box isn't FFI-safe
 pub enum Shape {
     /// A group of two 3-dimensional shapes
     Group(Box<Group>),

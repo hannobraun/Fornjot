@@ -28,6 +28,7 @@ use std::{
     thread,
 };
 
+use fj::abi;
 use notify::Watcher as _;
 use thiserror::Error;
 
@@ -112,8 +113,24 @@ impl Model {
         // https://github.com/hannobraun/Fornjot/issues/71
         let shape = unsafe {
             let lib = libloading::Library::new(&self.lib_path)?;
-            let model: libloading::Symbol<ModelFn> = lib.get(b"model")?;
-            model(arguments)
+            let init: libloading::Symbol<abi::InitFunction> =
+                lib.get(abi::INIT_FUNCTION_NAME.as_bytes())?;
+
+            let mut host = Host {
+                args: arguments,
+                model: None,
+            };
+
+            match init(&mut abi::Host::from(&mut host)) {
+                abi::ffi_safe::Result::Ok(_metadata) => {}
+                abi::ffi_safe::Result::Err(e) => {
+                    return Err(Error::InitializeModel(e.into()));
+                }
+            }
+
+            let model = host.model.take().ok_or(Error::NoModelRegistered)?;
+
+            model.shape(&host).map_err(Error::Shape)?
         };
 
         Ok(shape)
@@ -344,6 +361,19 @@ pub enum Error {
     #[error("Error loading model from dynamic library")]
     LibLoading(#[from] libloading::Error),
 
+    /// Initializing a model failed.
+    #[error("Unable to initialize the model")]
+    InitializeModel(#[source] Box<dyn std::error::Error + Send + Sync>),
+
+    /// The user forgot to register a model when calling
+    /// [`fj::register_model!()`].
+    #[error("No model was registered")]
+    NoModelRegistered,
+
+    /// An error was returned from [`fj::Model::shape()`].
+    #[error("Unable to determine the model's geometry")]
+    Shape(#[source] Box<dyn std::error::Error + Send + Sync>),
+
     /// Error while watching the model code for changes
     #[error("Error watching model for changes")]
     Notify(#[from] notify::Error),
@@ -371,4 +401,19 @@ pub enum Error {
     },
 }
 
-type ModelFn = unsafe extern "C" fn(args: &Parameters) -> fj::Shape;
+struct Host<'a> {
+    args: &'a Parameters,
+    model: Option<Box<dyn fj::Model>>,
+}
+
+impl<'a> fj::Host for Host<'a> {
+    fn register_boxed_model(&mut self, model: Box<dyn fj::Model>) {
+        self.model = Some(model);
+    }
+}
+
+impl<'a> fj::Context for Host<'a> {
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        self.args.get(name).map(|s| s.as_str())
+    }
+}
